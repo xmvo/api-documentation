@@ -1,34 +1,34 @@
-# API Documentation
-
-Reverse-engineered Discord API documentation.
-
+# discord api documentation
+reverse-engineered discord api reference for developers
 ---
 
-## Gateway (WebSocket)
+## gateway (websocket)
 
-the **gateway** is discord's way of sending data, it is a (`WebSocket`), it is used for sending realtime data, voice status updates, etc.
+the **gateway** is discord's real-time communication system. it's a websocket connection used for receiving events, maintaining presence, and handling voice updates.
 
-## Gateway URL (WebSocket)
+### gateway url
 
-to init a websocket connection you would connect to the URL
+connect to:
+```
+wss://gateway.discord.gg/?v=10&encoding=json
+```
 
-`wss://gateway.discord.gg/?v=10&encoding=json`
-
-- `v=10` is the current major api version (as of the time i document this)
-- `encoding=json` indicates that the payload will be in json format
+- `v=10` specifies api version 10
+- `encoding=json` tells the gateway you want json-formatted messages
 
 ---
 
 ### connection flow
 
-1 *connect* to the gateway url
-2 *recieve* the `op 10` hello event
-3 *start* sending a `heartbeat` at the given interval (ex: 1/6)
-4 *send* an `identify` paylod to authenticate
-5 *recieve* `dispatch` events (e.g, `READY` `MESSAGE_CREATE`, etc..)
+1. *connect* to the gateway url
+2. *receive* the `op 10` hello event
+3. *start* sending heartbeats at the interval provided in hello
+4. *send* an `identify` payload with your auth token
+5. *receive* `dispatch` events (`READY`, `MESSAGE_CREATE`, etc.)
 
-### structure
-most websocket messages will follow this format
+### message structure
+
+websocket messages follow this format:
 
 ```json
 {
@@ -38,25 +38,31 @@ most websocket messages will follow this format
   "t": "EVENT_NAME"
 }
 ```
-- `op` (int): opcode, defines message type
-- `d` (object): event data
-- `s` (int|null): sequence number, normally used for resuming sessions
-- `t` (string|null): event name (for `dispatches`)
 
+where:
+- `op` (int): opcode that defines the message type
+- `d` (object): event data payload
+- `s` (int|null): sequence number for resuming sessions
+- `t` (string|null): event name for dispatch events
 
-### mostly important opcodes you need to know;
-- 0 (dispatch) (event from discord, a msg)
-- 1 (heartbeat) (heartbeat ping to keep the websocket connection alive)
-- 2 (identify) (sent to login with a user or bot token)
-- 7 (reconnect) (server requests client to reconnect to the websocket)
-- 9 (invalid session) (re identify or resume required, happens more of the time when your session is invalidated due to an expired token or an older client version)
-- 10 (hello) (used to make sure the client can communicate correctly, sent instantly on connection)
-- 11 (heartbeat ack) (response to the heartbeat msg)
+### important opcodes
 
-### other sections coming soon
-- REST api (e.g., GET /channels/:id/messages)
-- auth and tokens
-- ratelimiting
-- voice sockets
+| opcode | name | direction | description |
+|--------|------|-----------|-------------|
+| 0 | dispatch | server → client | event notification (message created, etc.) |
+| 1 | heartbeat | client → server | ping to keep connection alive |
+| 2 | identify | client → server | authentication with token |
+| 7 | reconnect | server → client | server asks you to reconnect |
+| 9 | invalid session | server → client | session invalidated, need to re-identify |
+| 10 | hello | server → client | sent immediately on connecting |
+| 11 | heartbeat ack | server → client | confirms your heartbeat was received |
 
-This documentation is released under the MIT License.
+### coming soon
+- rest api endpoints
+- auth and token handling
+- ratelimit guidelines
+- voice connections
+
+---
+
+*this documentation is released under the mit license.*
