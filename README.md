@@ -1,5 +1,5 @@
 # discord api documentation
-reverse-engineered discord api reference for developers
+reverse engineered documentation reference including main gateway socket, etc.
 ---
 
 ## gateway (websocket)
